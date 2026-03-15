@@ -41,6 +41,18 @@ bun install
 bun src/index.ts
 ```
 
+### Update
+
+```bash
+session-md update
+```
+
+### Version
+
+```bash
+session-md --version
+```
+
 ## Configuration
 
 Config file: `~/.config/session-md/config.toml`

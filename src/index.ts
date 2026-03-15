@@ -10,7 +10,55 @@ import { importClaudeExport } from "./import/claude-export-to-md.ts";
 import type { SessionEntry } from "./import/types.ts";
 import { SearchIndex, deleteIndex } from "./search/index.ts";
 
+const { version } = require("../package.json");
+
+if (process.argv.includes("--version")) {
+  console.log(`session-md v${version}`);
+  process.exit(0);
+}
+
 const command = process.argv[2];
+
+if (command === "update") {
+  const oldVersion = version;
+  console.log(`Current version: v${oldVersion}`);
+  console.log("Checking for updates...");
+
+  try {
+    const res = await fetch("https://api.github.com/repos/AlexZeitler/session-md/releases/latest");
+    if (!res.ok) {
+      console.error(`Failed to check for updates (HTTP ${res.status})`);
+      process.exit(1);
+    }
+    const release = await res.json() as { tag_name: string };
+    const latestVersion = release.tag_name.replace(/^v/, "");
+
+    if (latestVersion === oldVersion) {
+      console.log(`✓ session-md v${oldVersion} is already up to date`);
+      process.exit(0);
+    }
+
+    console.log(`New version available: v${latestVersion}`);
+    console.log("Installing...");
+
+    const proc = Bun.spawnSync({
+      cmd: ["bun", "install", "-g", "github:AlexZeitler/session-md#v" + latestVersion],
+      stdout: "inherit",
+      stderr: "inherit",
+    });
+
+    if (proc.exitCode !== 0) {
+      console.error("Update failed");
+      process.exit(proc.exitCode ?? 1);
+    }
+
+    console.log(`✓ Updated session-md v${oldVersion} → v${latestVersion}`);
+  } catch (err) {
+    console.error(`Update failed: ${err}`);
+    process.exit(1);
+  }
+  process.exit(0);
+}
 
 if (command === "reindex") {
   deleteIndex();
