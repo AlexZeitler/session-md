@@ -226,6 +226,16 @@ export class ConversationList {
     }
   }
 
+  selectFirst(): void {
+    this.select.setSelectedIndex(0);
+  }
+
+  selectLast(): void {
+    if (this.visibleSessions.length > 0) {
+      this.select.setSelectedIndex(this.visibleSessions.length - 1);
+    }
+  }
+
   focus(): void {
     this.select.focus();
   }

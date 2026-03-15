@@ -229,4 +229,12 @@ export class MessageView {
   pageUp(): void {
     this.scrollBox.scrollBy(-10);
   }
+
+  scrollToTop(): void {
+    this.scrollBox.scrollTo(0);
+  }
+
+  scrollToBottom(): void {
+    this.scrollBox.scrollTo(999999);
+  }
 }

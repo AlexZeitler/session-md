@@ -83,6 +83,8 @@ opencode       = "~/.local/share/opencode/storage"
 | `Tab` | Cycle focus: Sources → Sessions → Detail |
 | `Shift+Tab` | Cycle focus backward |
 | `j` / `k` | Navigate list / scroll detail |
+| `gg` | Jump to top (list or detail) |
+| `G` | Jump to bottom (list or detail) |
 | `Ctrl+d` / `Ctrl+u` | Page down / up in detail |
 | `Esc` | Back to sessions from detail |
 

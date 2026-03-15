@@ -47,8 +47,8 @@ export class StatusBar {
 
     const hint =
       focus === "sidebar"
-        ? "j/k navigate  SPACE select  c copy  / filter  g grep  q quit"
-        : "j/k scroll  Esc back  q quit";
+        ? "j/k navigate  gg/G top/end  SPACE select  c copy  / filter  g grep  q quit"
+        : "j/k scroll  gg/G top/end  Esc back  q quit";
 
     this.statusText.content = t`${fg("#7fd88f")(selPrefix)}${fg("#808080")(`${totalCount} sessions`)} | ${fg("#808080")(hint)}`;
   }

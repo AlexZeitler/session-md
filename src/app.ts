@@ -41,6 +41,8 @@ export class App {
   private focusArea: FocusArea = "sidebar";
   private leftFocus: LeftFocus = "sources";
   private sessions: SessionEntry[] = [];
+  private pendingG = false;
+  private pendingGTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private renderer: CliRenderer,
@@ -296,9 +298,15 @@ export class App {
           this.setLeftFocus("sessions");
           return;
         }
-        if (key.name === "g" && !key.ctrl) {
+        if (key.name === "g" && !key.shift && !key.ctrl) {
           key.preventDefault();
-          this.enterContentSearch();
+          if (this.pendingG) {
+            this.clearPendingG();
+          } else {
+            this.startPendingG(() => {
+              this.enterContentSearch();
+            });
+          }
           return;
         }
         // Let SelectRenderable handle j/k
@@ -339,9 +347,22 @@ export class App {
           return;
         }
 
-        if (key.name === "g" && !key.ctrl) {
+        if (key.name === "g" && key.shift) {
           key.preventDefault();
-          this.enterContentSearch();
+          this.conversationList.selectLast();
+          return;
+        }
+
+        if (key.name === "g" && !key.shift && !key.ctrl) {
+          key.preventDefault();
+          if (this.pendingG) {
+            this.clearPendingG();
+            this.conversationList.selectFirst();
+          } else {
+            this.startPendingG(() => {
+              this.enterContentSearch();
+            });
+          }
           return;
         }
 
@@ -381,8 +402,42 @@ export class App {
           this.messageView.pageUp();
           return;
         }
+
+        if (key.name === "g" && key.shift) {
+          key.preventDefault();
+          this.messageView.scrollToBottom();
+          return;
+        }
+
+        if (key.name === "g" && !key.shift && !key.ctrl) {
+          key.preventDefault();
+          if (this.pendingG) {
+            this.clearPendingG();
+            this.messageView.scrollToTop();
+          } else {
+            this.startPendingG();
+          }
+          return;
+        }
       }
     });
+  }
+
+  private startPendingG(onTimeout?: () => void): void {
+    this.pendingG = true;
+    this.pendingGTimer = setTimeout(() => {
+      this.pendingG = false;
+      this.pendingGTimer = null;
+      onTimeout?.();
+    }, 300);
+  }
+
+  private clearPendingG(): void {
+    this.pendingG = false;
+    if (this.pendingGTimer) {
+      clearTimeout(this.pendingGTimer);
+      this.pendingGTimer = null;
+    }
   }
 
   private cycleeFocus(): void {
