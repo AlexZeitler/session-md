@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] - 2026-03-15
+
+### Added
+
+- `gg`/`G` vim-style navigation: jump to top/bottom in sessions list and detail view
+- `session-md update` command to install latest release from GitHub
+- `session-md --version` flag
+- Release script (`scripts/release.sh`)
+- CHANGELOG.md
+
+### Changed
+
+- `session-md reindex` is now a subcommand instead of `--reindex` flag
+
 ## [0.2.0] - 2026-03-15
 
 ### Added
