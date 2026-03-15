@@ -1,6 +1,6 @@
 # session-md
 
-A terminal UI for browsing and managing AI chat sessions from multiple sources — Claude Code, Claude.ai exports, OpenCode, and Memorizer.
+A terminal UI for browsing and managing AI chat sessions from multiple sources - Claude Code, Claude.ai exports, OpenCode, and Memorizer.
 
 Built with [Bun](https://bun.sh), [OpenTUI](https://github.com/anomalyco/opentui), and TypeScript.
 
@@ -12,7 +12,7 @@ Built with [Bun](https://bun.sh), [OpenTUI](https://github.com/anomalyco/opentui
 - Multi-select sessions and copy as Markdown to target folders
 - Markdown preview with syntax highlighting
 - Configurable targets for organizing exported sessions
-- Incremental search index — only new/changed sessions are re-indexed on startup
+- Incremental search index - only new/changed sessions are re-indexed on startup
 
 ## Supported Sources
 
@@ -116,7 +116,7 @@ opencode       = "~/.local/share/opencode/storage"
 | `/` | Return to search input |
 | `Esc` | Close search |
 
-Content search uses a SQLite FTS5 index stored at `~/.config/session-md/search-index.sqlite`. The index is built incrementally on startup — only new or changed sessions are indexed.
+Content search uses a SQLite FTS5 index stored at `~/.config/session-md/search-index.sqlite`. The index is built incrementally on startup - only new or changed sessions are indexed.
 
 To rebuild the index from scratch:
 

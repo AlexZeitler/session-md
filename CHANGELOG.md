@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 
 - Theming support with Omarchy auto-detection
-- Theme cascade: Omarchy `colors.toml` → `[theme]` in config.toml → built-in defaults
+- Theme cascade: Omarchy `colors.toml` -> `[theme]` in config.toml -> built-in defaults
 - All UI colors configurable via theme
 
 ## [0.3.0] - 2026-03-15
