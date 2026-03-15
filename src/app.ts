@@ -18,6 +18,7 @@ import { TargetPicker } from "./components/TargetPicker.ts";
 import { SearchResultsView } from "./components/SearchResultsView.ts";
 import { copySessionsToTarget } from "./file-ops.ts";
 import type { SearchIndex } from "./search/index.ts";
+import type { Theme } from "./theme.ts";
 
 type AppState = "browse" | "target-picker" | "content-search";
 type LeftFocus = "sources" | "sessions";
@@ -48,6 +49,7 @@ export class App {
     private renderer: CliRenderer,
     private config: Config,
     private searchIndex: SearchIndex,
+    private theme: Theme,
   ) {}
 
   async start(): Promise<void> {
@@ -82,7 +84,7 @@ export class App {
 
     const titleBar = new TextRenderable(r, {
       id: "title-bar",
-      content: t`${bold(fg("#fab283")(" session-md"))} ${fg("#808080")(`v${require("../package.json").version}`)}`,
+      content: t`${bold(fg(this.theme.title)(" session-md"))} ${fg(this.theme.muted)(`v${require("../package.json").version}`)}`,
     });
 
     this.body = new BoxRenderable(r, {
@@ -105,7 +107,7 @@ export class App {
       height: 8,
       border: true,
       borderStyle: "rounded",
-      borderColor: "cyan",
+      borderColor: this.theme.border_active,
       title: "Sources",
       titleAlignment: "left",
       flexDirection: "column",
@@ -117,7 +119,7 @@ export class App {
       flexGrow: 1,
       border: true,
       borderStyle: "rounded",
-      borderColor: "gray",
+      borderColor: this.theme.border_inactive,
       title: "Sessions",
       titleAlignment: "left",
       flexDirection: "column",
@@ -128,17 +130,17 @@ export class App {
       flexGrow: 1,
       border: true,
       borderStyle: "rounded",
-      borderColor: "gray",
+      borderColor: this.theme.border_inactive,
       flexDirection: "column",
     });
 
     // Create components
-    this.sourcePicker = new SourcePicker(r);
-    this.conversationList = new ConversationList(r);
-    this.messageView = new MessageView(r, this.mainBox);
-    this.statusBar = new StatusBar(r);
-    this.targetPicker = new TargetPicker(r);
-    this.searchResultsView = new SearchResultsView(r);
+    this.sourcePicker = new SourcePicker(r, this.theme);
+    this.conversationList = new ConversationList(r, this.theme);
+    this.messageView = new MessageView(r, this.mainBox, this.theme);
+    this.statusBar = new StatusBar(r, this.theme);
+    this.targetPicker = new TargetPicker(r, this.theme);
+    this.searchResultsView = new SearchResultsView(r, this.theme);
 
     // Wire up search
     this.searchResultsView.setOnSearchQuery((query) => {
@@ -446,9 +448,9 @@ export class App {
       this.setLeftFocus("sessions");
     } else if (this.focusArea === "sidebar" && this.leftFocus === "sessions") {
       this.focusArea = "main";
-      this.sourcesBox.borderColor = "gray";
-      this.sessionsBox.borderColor = "gray";
-      this.mainBox.borderColor = "cyan";
+      this.sourcesBox.borderColor = this.theme.border_inactive;
+      this.sessionsBox.borderColor = this.theme.border_inactive;
+      this.mainBox.borderColor = this.theme.border_active;
       this.messageView.expandFull();
       this.messageView.container.focus();
       this.updateStatusBar();
@@ -462,9 +464,9 @@ export class App {
     // Cycle backward: sources → main → sessions → sources
     if (this.focusArea === "sidebar" && this.leftFocus === "sources") {
       this.focusArea = "main";
-      this.sourcesBox.borderColor = "gray";
-      this.sessionsBox.borderColor = "gray";
-      this.mainBox.borderColor = "cyan";
+      this.sourcesBox.borderColor = this.theme.border_inactive;
+      this.sessionsBox.borderColor = this.theme.border_inactive;
+      this.mainBox.borderColor = this.theme.border_active;
       this.messageView.expandFull();
       this.messageView.container.focus();
       this.updateStatusBar();
@@ -479,15 +481,15 @@ export class App {
   private setLeftFocus(area: LeftFocus): void {
     this.focusArea = "sidebar";
     this.leftFocus = area;
-    this.mainBox.borderColor = "gray";
+    this.mainBox.borderColor = this.theme.border_inactive;
 
     if (area === "sources") {
-      this.sourcesBox.borderColor = "cyan";
-      this.sessionsBox.borderColor = "gray";
+      this.sourcesBox.borderColor = this.theme.border_active;
+      this.sessionsBox.borderColor = this.theme.border_inactive;
       this.sourcePicker.focus();
     } else {
-      this.sourcesBox.borderColor = "gray";
-      this.sessionsBox.borderColor = "cyan";
+      this.sourcesBox.borderColor = this.theme.border_inactive;
+      this.sessionsBox.borderColor = this.theme.border_active;
       this.conversationList.focus();
     }
     this.updateStatusBar();
@@ -516,9 +518,9 @@ export class App {
     this.mainBox.add(this.targetPicker.container);
     this.targetPicker.show(this.config.targets, selected.length);
     this.targetPicker.focus();
-    this.mainBox.borderColor = "cyan";
-    this.sourcesBox.borderColor = "gray";
-    this.sessionsBox.borderColor = "gray";
+    this.mainBox.borderColor = this.theme.border_active;
+    this.sourcesBox.borderColor = this.theme.border_inactive;
+    this.sessionsBox.borderColor = this.theme.border_inactive;
   }
 
   private exitTargetPicker(): void {
@@ -552,10 +554,10 @@ export class App {
     this.mainBox.add(this.searchResultsView.container);
     this.searchResultsView.reset();
     this.searchResultsView.focus();
-    this.mainBox.borderColor = "cyan";
+    this.mainBox.borderColor = this.theme.border_active;
     this.mainBox.title = "Content Search (g)";
-    this.sourcesBox.borderColor = "gray";
-    this.sessionsBox.borderColor = "gray";
+    this.sourcesBox.borderColor = this.theme.border_inactive;
+    this.sessionsBox.borderColor = this.theme.border_inactive;
   }
 
   private exitContentSearch(focusMain = false): void {
@@ -570,9 +572,9 @@ export class App {
 
     if (focusMain) {
       this.focusArea = "main";
-      this.sourcesBox.borderColor = "gray";
-      this.sessionsBox.borderColor = "gray";
-      this.mainBox.borderColor = "cyan";
+      this.sourcesBox.borderColor = this.theme.border_inactive;
+      this.sessionsBox.borderColor = this.theme.border_inactive;
+      this.mainBox.borderColor = this.theme.border_active;
       this.messageView.expandFull();
       this.messageView.container.focus();
       this.updateStatusBar();

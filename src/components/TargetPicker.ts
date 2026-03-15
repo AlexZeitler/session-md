@@ -11,6 +11,7 @@ import {
   fg,
   bold,
 } from "@opentui/core";
+import type { Theme } from "../theme.ts";
 
 export class TargetPicker {
   readonly container: BoxRenderable;
@@ -26,7 +27,7 @@ export class TargetPicker {
   onNewTarget: ((name: string, path: string) => void) | null = null;
   onCancel: (() => void) | null = null;
 
-  constructor(private ctx: CliRenderer) {
+  constructor(private ctx: CliRenderer, private theme?: Theme) {
     this.container = new BoxRenderable(ctx, {
       id: "target-picker",
       flexDirection: "column",
@@ -46,9 +47,9 @@ export class TargetPicker {
       options: [],
       showDescription: true,
       wrapSelection: true,
-      selectedBackgroundColor: "#264f78",
-      selectedTextColor: "#ffffff",
-      selectedDescriptionColor: "#a0c4e8",
+      selectedBackgroundColor: this.theme?.selection_bg ?? "#264f78",
+      selectedTextColor: this.theme?.selection_fg ?? "#ffffff",
+      selectedDescriptionColor: this.theme?.selection_desc ?? "#a0c4e8",
     });
 
     this.inputContainer = new BoxRenderable(ctx, {

@@ -5,6 +5,7 @@ import {
   type CliRenderer,
 } from "@opentui/core";
 import type { SourceType } from "../import/types.ts";
+import type { Theme } from "../theme.ts";
 
 export type SourceChangedHandler = (source: SourceType | "all") => void;
 
@@ -21,7 +22,7 @@ export class SourcePicker {
   private onSourceChanged: SourceChangedHandler | null = null;
   private currentSource: SourceType | "all" = "all";
 
-  constructor(ctx: CliRenderer) {
+  constructor(ctx: CliRenderer, private theme?: Theme) {
     this.select = new SelectRenderable(ctx, {
       id: "source-picker",
       width: "100%" as any,
@@ -31,8 +32,8 @@ export class SourcePicker {
       ],
       showDescription: false,
       wrapSelection: true,
-      selectedBackgroundColor: "#264f78",
-      selectedTextColor: "#ffffff",
+      selectedBackgroundColor: theme?.selection_bg ?? "#264f78",
+      selectedTextColor: theme?.selection_fg ?? "#ffffff",
     });
 
     this.select.on(

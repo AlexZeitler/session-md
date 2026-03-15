@@ -12,6 +12,7 @@ import {
   bold,
 } from "@opentui/core";
 import type { SessionEntry, SourceType } from "../import/types.ts";
+import type { Theme } from "../theme.ts";
 
 export type SessionFocusedHandler = (session: SessionEntry) => void;
 
@@ -34,7 +35,7 @@ export class ConversationList {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private suppressNextSelection = false;
 
-  constructor(private ctx: CliRenderer) {
+  constructor(private ctx: CliRenderer, private theme: Theme) {
     this.container = new BoxRenderable(ctx, {
       id: "conversation-list",
       flexDirection: "column",
@@ -63,9 +64,9 @@ export class ConversationList {
       showDescription: true,
       showScrollIndicator: true,
       wrapSelection: true,
-      selectedBackgroundColor: "#264f78",
-      selectedTextColor: "#ffffff",
-      selectedDescriptionColor: "#a0c4e8",
+      selectedBackgroundColor: this.theme.selection_bg,
+      selectedTextColor: this.theme.selection_fg,
+      selectedDescriptionColor: this.theme.selection_desc,
     });
 
     this.container.add(this.statusText);
@@ -198,7 +199,7 @@ export class ConversationList {
 
     const filterInfo = query ? ` filter="${query}"` : "";
     this.statusText.content =
-      t`${fg("#808080")(` ${filtered.length} sessions${filterInfo}`)}`;
+      t`${fg(this.theme.muted)(` ${filtered.length} sessions${filterInfo}`)}`;
 
     this.select.options = filtered.map((s) => {
       const check = this.selected.has(s.meta.id) ? "[x]" : "[ ]";

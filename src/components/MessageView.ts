@@ -11,6 +11,7 @@ import {
   fg,
 } from "@opentui/core";
 import type { SessionEntry } from "../import/types.ts";
+import type { Theme } from "../theme.ts";
 import { loadSessionMarkdownAsync } from "../import/loader.ts";
 
 const SPINNER_FRAMES = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"];
@@ -30,23 +31,23 @@ export class MessageView {
   private spinnerFrame = 0;
   private loadFull = false;
 
-  constructor(private ctx: CliRenderer, private mainBox: BoxRenderable) {
+  constructor(private ctx: CliRenderer, private mainBox: BoxRenderable, private theme: Theme) {
     this.syntaxStyle = SyntaxStyle.fromStyles({
-      default: { fg: parseColor("#eeeeee") },
-      "markup.heading": { fg: parseColor("#9d7cd8"), bold: true },
-      "markup.heading.1": { fg: parseColor("#9d7cd8"), bold: true },
-      "markup.heading.2": { fg: parseColor("#9d7cd8"), bold: true },
-      "markup.heading.3": { fg: parseColor("#9d7cd8"), bold: true },
-      "markup.strong": { fg: parseColor("#f5a742"), bold: true },
-      "markup.italic": { fg: parseColor("#e5c07b"), italic: true },
-      "markup.raw": { fg: parseColor("#7fd88f") },
+      default: { fg: parseColor(theme.foreground) },
+      "markup.heading": { fg: parseColor(theme.heading), bold: true },
+      "markup.heading.1": { fg: parseColor(theme.heading), bold: true },
+      "markup.heading.2": { fg: parseColor(theme.heading), bold: true },
+      "markup.heading.3": { fg: parseColor(theme.heading), bold: true },
+      "markup.strong": { fg: parseColor(theme.strong), bold: true },
+      "markup.italic": { fg: parseColor(theme.italic), italic: true },
+      "markup.raw": { fg: parseColor(theme.code) },
       "markup.strikethrough": { dim: true },
-      "markup.link.label": { fg: parseColor("#56b6c2"), underline: true },
-      "markup.link.url": { fg: parseColor("#fab283") },
-      "markup.link": { fg: parseColor("#808080") },
-      "markup.list": { fg: parseColor("#fab283") },
-      "punctuation.special": { fg: parseColor("#808080") },
-      conceal: { fg: parseColor("#808080") },
+      "markup.link.label": { fg: parseColor(theme.link), underline: true },
+      "markup.link.url": { fg: parseColor(theme.link_url) },
+      "markup.link": { fg: parseColor(theme.muted) },
+      "markup.list": { fg: parseColor(theme.list) },
+      "punctuation.special": { fg: parseColor(theme.muted) },
+      conceal: { fg: parseColor(theme.muted) },
     });
 
     this.outerBox = new BoxRenderable(ctx, {
@@ -145,20 +146,20 @@ export class MessageView {
 
   private setTitle(title: string, source?: string): void {
     if (source) {
-      this.titleBar.content = t`${bold(fg("#fab283")(` ${title}`))} ${fg("#808080")(`(${source})`)}`;
+      this.titleBar.content = t`${bold(fg(this.theme.title)(` ${title}`))} ${fg(this.theme.muted)(`(${source})`)}`;
     } else {
-      this.titleBar.content = t`${bold(fg("#fab283")(` ${title}`))}`;
+      this.titleBar.content = t`${bold(fg(this.theme.title)(` ${title}`))}`;
     }
   }
 
   private startSpinner(entry: SessionEntry): void {
     this.stopSpinner();
     this.spinnerFrame = 0;
-    this.titleBar.content = t`${fg("#00cccc")(` ${SPINNER_FRAMES[0]}`)} ${fg("#808080")(entry.meta.title)}`;
+    this.titleBar.content = t`${fg(this.theme.spinner)(` ${SPINNER_FRAMES[0]}`)} ${fg(this.theme.muted)(entry.meta.title)}`;
     this.spinnerTimer = setInterval(() => {
       this.spinnerFrame = (this.spinnerFrame + 1) % SPINNER_FRAMES.length;
       if (this.currentEntry) {
-        this.titleBar.content = t`${fg("#00cccc")(` ${SPINNER_FRAMES[this.spinnerFrame]}`)} ${fg("#808080")(this.currentEntry.meta.title)}`;
+        this.titleBar.content = t`${fg(this.theme.spinner)(` ${SPINNER_FRAMES[this.spinnerFrame]}`)} ${fg(this.theme.muted)(this.currentEntry.meta.title)}`;
       }
     }, 80);
   }

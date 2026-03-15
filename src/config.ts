@@ -16,6 +16,7 @@ export interface Config {
     memorizer_url?: string;
     memorizer_output?: string;
   };
+  theme?: Record<string, string>;
 }
 
 const DEFAULT_CONFIG: Config = {
@@ -67,6 +68,7 @@ export async function loadConfig(): Promise<Config> {
     default_target: parsed.default_target ?? DEFAULT_CONFIG.default_target,
     targets: parsed.targets ?? DEFAULT_CONFIG.targets,
     sources: { ...DEFAULT_CONFIG.sources, ...parsed.sources },
+    theme: (parsed as any).theme ?? undefined,
   };
 
   return expandPaths(config);

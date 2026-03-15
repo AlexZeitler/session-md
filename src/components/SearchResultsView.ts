@@ -11,6 +11,7 @@ import {
   bold,
 } from "@opentui/core";
 import type { SearchResult } from "../search/index.ts";
+import type { Theme } from "../theme.ts";
 
 export class SearchResultsView {
   readonly container: BoxRenderable;
@@ -23,7 +24,7 @@ export class SearchResultsView {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private onSearchQuery: ((query: string) => SearchResult[]) | null = null;
 
-  constructor(private ctx: CliRenderer) {
+  constructor(private ctx: CliRenderer, private theme: Theme) {
     this.container = new BoxRenderable(ctx, {
       id: "search-results",
       flexDirection: "column",
@@ -49,9 +50,9 @@ export class SearchResultsView {
       showDescription: true,
       showScrollIndicator: true,
       wrapSelection: true,
-      selectedBackgroundColor: "#264f78",
-      selectedTextColor: "#ffffff",
-      selectedDescriptionColor: "#a0c4e8",
+      selectedBackgroundColor: this.theme.selection_bg,
+      selectedTextColor: this.theme.selection_fg,
+      selectedDescriptionColor: this.theme.selection_desc,
     });
 
     this.container.add(this.searchInput);
@@ -86,12 +87,12 @@ export class SearchResultsView {
     if (!query || !this.onSearchQuery) {
       this.results = [];
       this.select.options = [];
-      this.statusText.content = t`${fg("#808080")(" Type to search...")}`;
+      this.statusText.content = t`${fg(this.theme.muted)(" Type to search...")}`;
       return;
     }
 
     this.results = this.onSearchQuery(query);
-    this.statusText.content = t`${fg("#808080")(` ${this.results.length} result(s)`)}`;
+    this.statusText.content = t`${fg(this.theme.muted)(` ${this.results.length} result(s)`)}`;
 
     if (this.results.length === 0) {
       this.select.options = [{ name: "No results", description: "", value: "__none__" }];
@@ -136,7 +137,7 @@ export class SearchResultsView {
     this.results = [];
     this.select.options = [{ name: "", description: "", value: "__none__" }];
     this.inputFocused = true;
-    this.statusText.content = t`${fg("#808080")(" Type to search...")}`;
+    this.statusText.content = t`${fg(this.theme.muted)(" Type to search...")}`;
   }
 
   focus(): void {

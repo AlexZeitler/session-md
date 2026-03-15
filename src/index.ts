@@ -9,6 +9,7 @@ import { scanMemorizerMemories } from "./import/memorizer-to-md.ts";
 import { importClaudeExport } from "./import/claude-export-to-md.ts";
 import type { SessionEntry } from "./import/types.ts";
 import { SearchIndex, deleteIndex } from "./search/index.ts";
+import { loadTheme } from "./theme.ts";
 
 const { version } = require("../package.json");
 
@@ -168,7 +169,8 @@ try {
     exitOnCtrlC: true,
   });
 
-  const app = new App(renderer, config, searchIndex);
+  const theme = loadTheme(config.theme);
+  const app = new App(renderer, config, searchIndex, theme);
   await app.start();
   app.loadSessions(allSessions);
 } catch (err) {

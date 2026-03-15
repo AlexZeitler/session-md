@@ -6,6 +6,7 @@ import {
   fg,
   bold,
 } from "@opentui/core";
+import type { Theme } from "../theme.ts";
 
 export type FocusArea = "sidebar" | "main";
 
@@ -14,13 +15,13 @@ export class StatusBar {
   private statusText: TextRenderable;
   private msgText: TextRenderable;
 
-  constructor(private ctx: CliRenderer) {
+  constructor(private ctx: CliRenderer, private theme: Theme) {
     this.container = new BoxRenderable(ctx, {
       id: "status-bar",
       height: 3,
       width: "100%" as any,
       borderStyle: "rounded",
-      borderColor: "gray",
+      borderColor: this.theme.border_inactive,
       flexDirection: "row",
       justifyContent: "space-between",
     });
@@ -50,18 +51,18 @@ export class StatusBar {
         ? "j/k navigate  gg/G top/end  SPACE select  c copy  / filter  g grep  q quit"
         : "j/k scroll  gg/G top/end  Esc back  q quit";
 
-    this.statusText.content = t`${fg("#7fd88f")(selPrefix)}${fg("#808080")(`${totalCount} sessions`)} | ${fg("#808080")(hint)}`;
+    this.statusText.content = t`${fg(this.theme.success)(selPrefix)}${fg(this.theme.muted)(`${totalCount} sessions`)} | ${fg(this.theme.muted)(hint)}`;
   }
 
   showError(msg: string): void {
-    this.msgText.content = t`${fg("#e06c75")(msg)}`;
+    this.msgText.content = t`${fg(this.theme.error)(msg)}`;
     setTimeout(() => {
       this.msgText.content = "";
     }, 5000);
   }
 
   showInfo(msg: string): void {
-    this.msgText.content = t`${fg("#7fd88f")(msg)}`;
+    this.msgText.content = t`${fg(this.theme.success)(msg)}`;
     setTimeout(() => {
       this.msgText.content = "";
     }, 3000);
