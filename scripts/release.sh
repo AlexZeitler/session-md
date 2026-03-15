@@ -17,8 +17,8 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Check for uncommitted changes
-if [ -n "$(git status --porcelain)" ]; then
+# Check for uncommitted changes (ignore untracked files)
+if [ -n "$(git diff --stat HEAD)" ]; then
   echo "Error: Uncommitted changes. Commit first."
   exit 1
 fi
