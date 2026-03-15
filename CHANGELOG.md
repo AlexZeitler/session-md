@@ -4,28 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## v0.2.1
-
-
-### 🚀 Enhancements
-
-- Add TUI for browsing AI chat sessions from multiple sources ([54128eb](https://github.com/AlexZeitler/session-md/commit/54128eb))
-- Add full-text content search with SQLite FTS5 index ([982b0e7](https://github.com/AlexZeitler/session-md/commit/982b0e7))
-- Add --reindex flag to rebuild search index from scratch ([5744841](https://github.com/AlexZeitler/session-md/commit/5744841))
-- Add update command, --version flag, and changelog ([33ec27e](https://github.com/AlexZeitler/session-md/commit/33ec27e))
-
-### 💅 Refactors
-
-- Use subcommand instead of flag for reindex ([5aa59c5](https://github.com/AlexZeitler/session-md/commit/5aa59c5))
-
-### 📖 Documentation
-
-- Add content search and --reindex to README ([a555eb5](https://github.com/AlexZeitler/session-md/commit/a555eb5))
-
-### ❤️ Contributors
-
-- Alexander Zeitler ([@AlexZeitler](https://github.com/AlexZeitler))
-
 ## [0.2.0] - 2026-03-15
 
 ### Added
@@ -36,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `session-md reindex` to rebuild the search index from scratch
 - `session-md update` to install the latest release from GitHub
 - `session-md --version` to display the current version
+- Release script (`scripts/release.sh`)
 
 ## [0.1.0] - 2026-03-13
 
