@@ -8,9 +8,11 @@ Built with [Bun](https://bun.sh), [OpenTUI](https://github.com/anomalyco/opentui
 
 - Browse sessions from 4 sources in a single TUI
 - Filter sessions by source and text search
+- **Full-text content search** (`g`) with SQLite FTS5 index
 - Multi-select sessions and copy as Markdown to target folders
 - Markdown preview with syntax highlighting
 - Configurable targets for organizing exported sessions
+- Incremental search index — only new/changed sessions are re-indexed on startup
 
 ## Supported Sources
 
@@ -78,10 +80,11 @@ opencode       = "~/.local/share/opencode/storage"
 |-----|--------|
 | `Space` | Toggle selection |
 | `/` | Open text filter |
+| `g` | Full-text content search (grep) |
 | `c` | Copy selected sessions to target |
 | `q` | Quit |
 
-### Filter
+### Filter (`/`)
 
 | Key | Action |
 |-----|--------|
@@ -89,6 +92,23 @@ opencode       = "~/.local/share/opencode/storage"
 | `Enter` | Move to filtered results (filter stays active) |
 | `/` | Return to filter input |
 | `Esc` | Close filter |
+
+### Content Search (`g`)
+
+| Key | Action |
+|-----|--------|
+| Type | Search within session content (FTS5) |
+| `Enter` | Move to results / open selected result |
+| `/` | Return to search input |
+| `Esc` | Close search |
+
+Content search uses a SQLite FTS5 index stored at `~/.config/session-md/search-index.sqlite`. The index is built incrementally on startup — only new or changed sessions are indexed.
+
+To rebuild the index from scratch:
+
+```bash
+session-md --reindex
+```
 
 ## Requirements
 
