@@ -102,6 +102,7 @@ export function scanClaudeCodeSessions(
         entries.push({
           filename: `${date}-${shortId}.md`,
           sourcePath: filePath,
+          contentHash: String(stat.size),
           meta: {
             title,
             id: sessionId,

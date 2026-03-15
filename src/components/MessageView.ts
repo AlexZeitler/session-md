@@ -28,6 +28,7 @@ export class MessageView {
   private isPreview = false;
   private spinnerTimer: ReturnType<typeof setInterval> | null = null;
   private spinnerFrame = 0;
+  private loadFull = false;
 
   constructor(private ctx: CliRenderer, private mainBox: BoxRenderable) {
     this.syntaxStyle = SyntaxStyle.fromStyles({
@@ -113,8 +114,8 @@ export class MessageView {
 
         this.fullContent = content;
 
-        // Only render a preview to keep sidebar navigation smooth
-        if (content.length > PREVIEW_LIMIT) {
+        // Only render a preview to keep sidebar navigation smooth (unless full requested)
+        if (!this.loadFull && content.length > PREVIEW_LIMIT) {
           const cutoff = content.lastIndexOf("\n", PREVIEW_LIMIT);
           const preview = content.slice(0, cutoff > 0 ? cutoff : PREVIEW_LIMIT);
           this.contentMarkdown.content = preview + "\n\n---\n*Press Tab to view full content…*";
@@ -127,6 +128,7 @@ export class MessageView {
         // Stop spinner + un-dim AFTER content is set
         this.stopSpinner();
         this.scrollBox.opacity = 1;
+        this.loadFull = false;
         this.setTitle(entry.meta.title, entry.meta.source);
         this.scrollBox.scrollTo(0);
       })
@@ -201,6 +203,11 @@ export class MessageView {
         }
       }, 300);
     }
+  }
+
+  /** Next load() will render full content instead of preview */
+  setLoadFull(full: boolean): void {
+    this.loadFull = full;
   }
 
   get container(): ScrollBoxRenderable {

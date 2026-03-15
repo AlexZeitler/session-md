@@ -9,6 +9,8 @@ export interface SessionEntry {
   sourcePath: string;
   /** Pre-generated markdown (only set for memorizer/claude-export, null for lazy sources) */
   md?: string;
+  /** Hash for search index invalidation (file size, updated_at, etc.) */
+  contentHash: string;
 }
 
 export interface SessionMeta {

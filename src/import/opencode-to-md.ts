@@ -1,5 +1,5 @@
 import { join } from "path";
-import { readdirSync, existsSync, readFileSync } from "fs";
+import { readdirSync, existsSync, readFileSync, statSync } from "fs";
 import {
   type SessionEntry,
   type SessionMeta,
@@ -73,12 +73,15 @@ export function scanOpencodeSessions(
       const ses = readJson<OcSession>(join(projDir, file));
       if (!ses) continue;
 
+      const filePath = join(projDir, file);
       const date = formatDate(new Date(ses.time.created));
       const shortId = ses.id.replace(/^ses_/, "").slice(0, 8);
+      const fileStat = statSync(filePath);
 
       entries.push({
         filename: `${date}-${shortId}.md`,
-        sourcePath: join(projDir, file),
+        sourcePath: filePath,
+        contentHash: String(fileStat.size),
         meta: {
           title: ses.title || `Session ${shortId}`,
           id: ses.id,

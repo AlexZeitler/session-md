@@ -98,6 +98,7 @@ export async function scanMemorizerMemories(
         entries.push({
           filename: join(wsSlug, projSlug, `${titleSlug}.md`),
           sourcePath: `${baseUrl}/api/memory/${mem.id}`,
+          contentHash: mem.updatedAt,
           md,
           meta: {
             title: mem.title,

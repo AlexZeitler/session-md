@@ -32,6 +32,7 @@ export class ConversationList {
   private filterInputFocused = false;
   private sourceFilter: SourceType | "all" = "all";
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private suppressNextSelection = false;
 
   constructor(private ctx: CliRenderer) {
     this.container = new BoxRenderable(ctx, {
@@ -73,8 +74,11 @@ export class ConversationList {
     this.select.on(
       SelectRenderableEvents.SELECTION_CHANGED,
       (_index: number, option: SelectOption) => {
-        // Debounce: only fire after 150ms pause (fast j/k skips intermediate)
         if (this.debounceTimer) clearTimeout(this.debounceTimer);
+        if (this.suppressNextSelection) {
+          this.suppressNextSelection = false;
+          return;
+        }
         this.debounceTimer = setTimeout(() => {
           const session = this.visibleSessions.find(
             (s) => s.meta.id === option.value,
@@ -206,6 +210,20 @@ export class ConversationList {
         value: s.meta.id,
       };
     });
+  }
+
+  getSourceFilter(): SourceType | "all" {
+    return this.sourceFilter;
+  }
+
+  selectById(id: string): void {
+    const index = this.visibleSessions.findIndex((s) => s.meta.id === id);
+    if (index >= 0) {
+      // Suppress debounce callback — caller handles the load
+      if (this.debounceTimer) clearTimeout(this.debounceTimer);
+      this.suppressNextSelection = true;
+      this.select.setSelectedIndex(index);
+    }
   }
 
   focus(): void {

@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, statSync } from "fs";
 import {
   type SessionEntry,
   type SessionMeta,
@@ -93,6 +93,7 @@ export async function importClaudeExport(
 
   if (!Array.isArray(conversations)) return [];
 
+  const fileHash = String(statSync(filePath).size);
   const entries: SessionEntry[] = [];
   for (const conv of conversations) {
     if (!conv.chat_messages || conv.chat_messages.length === 0) continue;
@@ -104,6 +105,7 @@ export async function importClaudeExport(
     entries.push({
       filename: `${date}-${slug}.md`,
       sourcePath: filePath,
+      contentHash: fileHash,
       md,
       meta: {
         title: conv.name || "Untitled",

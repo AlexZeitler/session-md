@@ -15,9 +15,11 @@ import { ConversationList } from "./components/ConversationList.ts";
 import { MessageView } from "./components/MessageView.ts";
 import { StatusBar, type FocusArea } from "./components/StatusBar.ts";
 import { TargetPicker } from "./components/TargetPicker.ts";
+import { SearchResultsView } from "./components/SearchResultsView.ts";
 import { copySessionsToTarget } from "./file-ops.ts";
+import type { SearchIndex } from "./search/index.ts";
 
-type AppState = "browse" | "target-picker";
+type AppState = "browse" | "target-picker" | "content-search";
 type LeftFocus = "sources" | "sessions";
 
 export class App {
@@ -33,6 +35,7 @@ export class App {
   private messageView!: MessageView;
   private statusBar!: StatusBar;
   private targetPicker!: TargetPicker;
+  private searchResultsView!: SearchResultsView;
 
   private state: AppState = "browse";
   private focusArea: FocusArea = "sidebar";
@@ -42,6 +45,7 @@ export class App {
   constructor(
     private renderer: CliRenderer,
     private config: Config,
+    private searchIndex: SearchIndex,
   ) {}
 
   async start(): Promise<void> {
@@ -132,6 +136,23 @@ export class App {
     this.messageView = new MessageView(r, this.mainBox);
     this.statusBar = new StatusBar(r);
     this.targetPicker = new TargetPicker(r);
+    this.searchResultsView = new SearchResultsView(r);
+
+    // Wire up search
+    this.searchResultsView.setOnSearchQuery((query) => {
+      const source = this.conversationList.getSourceFilter();
+      return this.searchIndex.search(query, source);
+    });
+
+    this.searchResultsView.setOnResultSelected((result) => {
+      const session = this.sessions.find((s) => s.meta.id === result.id);
+      if (session) {
+        this.exitContentSearch(true);
+        this.messageView.setLoadFull(true);
+        this.messageView.load(session);
+        this.conversationList.selectById(result.id);
+      }
+    });
 
     // Wire up callbacks
     this.sourcePicker.setOnSourceChanged((source) => {
@@ -206,6 +227,38 @@ export class App {
         // Fall through to normal session key handling (j/k, SPACE, c, etc.)
       }
 
+      // Content search state
+      if (this.state === "content-search") {
+        if (this.searchResultsView.isInputFocused()) {
+          if (key.name === "escape") {
+            key.preventDefault();
+            this.exitContentSearch();
+          } else if (key.name === "return") {
+            key.preventDefault();
+            this.searchResultsView.focusList();
+          }
+          return;
+        }
+        // List is focused
+        if (key.name === "escape") {
+          key.preventDefault();
+          this.exitContentSearch();
+          return;
+        }
+        if (key.name === "slash" || key.name === "/" || (key.shift && key.name === "7")) {
+          key.preventDefault();
+          this.searchResultsView.focusInput();
+          return;
+        }
+        if (key.name === "return") {
+          key.preventDefault();
+          this.searchResultsView.selectCurrentResult();
+          return;
+        }
+        // Let SelectRenderable handle j/k
+        return;
+      }
+
       // Target picker state
       if (this.state === "target-picker") {
         if (key.name === "escape") {
@@ -241,6 +294,11 @@ export class App {
         if (key.name === "return") {
           key.preventDefault();
           this.setLeftFocus("sessions");
+          return;
+        }
+        if (key.name === "g" && !key.ctrl) {
+          key.preventDefault();
+          this.enterContentSearch();
           return;
         }
         // Let SelectRenderable handle j/k
@@ -281,6 +339,11 @@ export class App {
           return;
         }
 
+        if (key.name === "g" && !key.ctrl) {
+          key.preventDefault();
+          this.enterContentSearch();
+          return;
+        }
 
         // Let SelectRenderable handle j/k/Enter
         return;
@@ -423,6 +486,44 @@ export class App {
       this.statusBar.showError(`Copy failed: ${err}`);
     }
     this.exitTargetPicker();
+  }
+
+  private enterContentSearch(): void {
+    this.state = "content-search";
+
+    for (const child of this.mainBox.getChildren()) {
+      this.mainBox.remove(child.id);
+    }
+    this.mainBox.add(this.searchResultsView.container);
+    this.searchResultsView.reset();
+    this.searchResultsView.focus();
+    this.mainBox.borderColor = "cyan";
+    this.mainBox.title = "Content Search (g)";
+    this.sourcesBox.borderColor = "gray";
+    this.sessionsBox.borderColor = "gray";
+  }
+
+  private exitContentSearch(focusMain = false): void {
+    this.state = "browse";
+    this.searchResultsView.reset();
+
+    for (const child of this.mainBox.getChildren()) {
+      this.mainBox.remove(child.id);
+    }
+    this.mainBox.add(this.messageView.outerBox);
+    this.mainBox.title = "";
+
+    if (focusMain) {
+      this.focusArea = "main";
+      this.sourcesBox.borderColor = "gray";
+      this.sessionsBox.borderColor = "gray";
+      this.mainBox.borderColor = "cyan";
+      this.messageView.expandFull();
+      this.messageView.container.focus();
+      this.updateStatusBar();
+    } else {
+      this.setLeftFocus("sessions");
+    }
   }
 
   private async handleNewTarget(name: string, path: string): Promise<void> {
