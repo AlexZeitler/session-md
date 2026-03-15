@@ -1,13 +1,21 @@
 import { Database } from "bun:sqlite";
 import { join } from "path";
 import { homedir } from "os";
-import { mkdirSync, existsSync } from "fs";
+import { mkdirSync, existsSync, unlinkSync } from "fs";
 import { stripMarkdown } from "./plaintext.ts";
 import type { SessionEntry, SourceType } from "../import/types.ts";
 import { loadSessionMarkdownSync } from "../import/loader.ts";
 
 const CONFIG_DIR = join(homedir(), ".config", "session-md");
 const DB_PATH = join(CONFIG_DIR, "search-index.sqlite");
+
+export function deleteIndex(): boolean {
+  for (const suffix of ["", "-wal", "-shm"]) {
+    const p = DB_PATH + suffix;
+    if (existsSync(p)) unlinkSync(p);
+  }
+  return true;
+}
 
 export interface SearchResult {
   id: string;

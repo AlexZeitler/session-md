@@ -8,7 +8,12 @@ import { scanOpencodeSessions } from "./import/opencode-to-md.ts";
 import { scanMemorizerMemories } from "./import/memorizer-to-md.ts";
 import { importClaudeExport } from "./import/claude-export-to-md.ts";
 import type { SessionEntry } from "./import/types.ts";
-import { SearchIndex } from "./search/index.ts";
+import { SearchIndex, deleteIndex } from "./search/index.ts";
+
+if (process.argv.includes("--reindex")) {
+  deleteIndex();
+  console.log("✓ Search index deleted, will rebuild on next start.");
+}
 
 const SPINNER_FRAMES = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"];
 
