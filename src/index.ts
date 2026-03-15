@@ -10,7 +10,9 @@ import { importClaudeExport } from "./import/claude-export-to-md.ts";
 import type { SessionEntry } from "./import/types.ts";
 import { SearchIndex, deleteIndex } from "./search/index.ts";
 
-if (process.argv.includes("--reindex")) {
+const command = process.argv[2];
+
+if (command === "reindex") {
   deleteIndex();
   console.log("✓ Search index deleted, will rebuild on next start.");
 }

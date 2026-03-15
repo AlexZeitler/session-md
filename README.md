@@ -107,7 +107,7 @@ Content search uses a SQLite FTS5 index stored at `~/.config/session-md/search-i
 To rebuild the index from scratch:
 
 ```bash
-session-md --reindex
+session-md reindex
 ```
 
 ## Requirements
