@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0] - 2026-03-28
+
+### Added
+
+- MCP server with stdio and HTTP transports
+- MCP tools: `search_sessions`, `list_sessions`, `get_session`, `import_sessions`
+- HTTP daemon mode (`session-md mcp --http --daemon`) with PID file management
+- Health endpoint (`GET /health`) for HTTP transport
+- `session-md mcp stop` to stop a running daemon
+
 ## [0.4.0] - 2026-03-15
 
 ### Added

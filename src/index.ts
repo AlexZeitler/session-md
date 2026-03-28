@@ -64,6 +64,105 @@ if (command === "update") {
 if (command === "reindex") {
   deleteIndex();
   console.log("✓ Search index deleted, will rebuild on next start.");
+  process.exit(0);
+}
+
+// --- MCP subcommand ---
+if (command === "mcp") {
+  const sub = process.argv[3];
+  const args = process.argv.slice(3);
+  const hasFlag = (f: string) => args.includes(f);
+  const getFlagValue = (f: string) => {
+    const idx = args.indexOf(f);
+    return idx >= 0 && idx + 1 < args.length ? args[idx + 1] : undefined;
+  };
+
+  const { resolve } = await import("path");
+  const { homedir } = await import("os");
+  const { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, openSync, closeSync } = await import("fs");
+  const { spawn: nodeSpawn } = await import("child_process");
+  const { fileURLToPath } = await import("url");
+
+  const cacheDir = process.env.XDG_CACHE_HOME
+    ? resolve(process.env.XDG_CACHE_HOME, "session-md")
+    : resolve(homedir(), ".cache", "session-md");
+  const pidPath = resolve(cacheDir, "mcp.pid");
+
+  if (sub === "stop") {
+    if (!existsSync(pidPath)) {
+      console.log("Not running (no PID file).");
+      process.exit(0);
+    }
+    const pid = parseInt(readFileSync(pidPath, "utf-8").trim());
+    try {
+      process.kill(pid, 0);
+      process.kill(pid, "SIGTERM");
+      unlinkSync(pidPath);
+      console.log(`Stopped session-md MCP server (PID ${pid}).`);
+    } catch {
+      unlinkSync(pidPath);
+      console.log("Cleaned up stale PID file (server was not running).");
+    }
+    process.exit(0);
+  }
+
+  if (hasFlag("--http")) {
+    const port = Number(getFlagValue("--port")) || 8282;
+
+    if (hasFlag("--daemon")) {
+      // Guard: check if already running
+      if (existsSync(pidPath)) {
+        const existingPid = parseInt(readFileSync(pidPath, "utf-8").trim());
+        try {
+          process.kill(existingPid, 0);
+          console.error(`Already running (PID ${existingPid}). Run 'session-md mcp stop' first.`);
+          process.exit(1);
+        } catch {
+          // Stale PID file — continue
+        }
+      }
+
+      mkdirSync(cacheDir, { recursive: true });
+      const logPath = resolve(cacheDir, "mcp.log");
+      const logFd = openSync(logPath, "w");
+      const selfPath = fileURLToPath(import.meta.url);
+      const child = nodeSpawn(process.execPath, [selfPath, "mcp", "--http", "--port", String(port)], {
+        stdio: ["ignore", logFd, logFd],
+        detached: true,
+      });
+      child.unref();
+      closeSync(logFd);
+
+      writeFileSync(pidPath, String(child.pid));
+      console.log(`Started on http://localhost:${port}/mcp (PID ${child.pid})`);
+      console.log(`Logs: ${logPath}`);
+      process.exit(0);
+    }
+
+    // Foreground HTTP mode
+    const { startMcpHttpServer } = await import("./mcp/http.ts");
+    try {
+      await startMcpHttpServer(port);
+    } catch (e: any) {
+      if (e?.code === "EADDRINUSE") {
+        console.error(`Port ${port} already in use. Try a different port with --port.`);
+        process.exit(1);
+      }
+      throw e;
+    }
+  } else {
+    // Default: stdio transport
+    const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
+    const { createMcpServer, createSessionStore } = await import("./mcp/server.ts");
+    const store = await createSessionStore();
+    const server = await createMcpServer(store);
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+  }
+
+  // Block forever — HTTP server and stdio transport keep the process alive
+  // via the event loop; this prevents falling through to the TUI code below.
+  await new Promise(() => {});
 }
 
 const SPINNER_FRAMES = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"];

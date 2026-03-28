@@ -124,6 +124,60 @@ To rebuild the index from scratch:
 session-md reindex
 ```
 
+## MCP Server
+
+session-md can run as an [MCP](https://modelcontextprotocol.io/) server, exposing session search and retrieval to AI assistants like Claude Code.
+
+### Stdio Transport
+
+For direct integration with Claude Code:
+
+```bash
+session-md mcp
+```
+
+Add to your Claude Code MCP config:
+
+```json
+{
+  "mcpServers": {
+    "session-md": {
+      "command": "session-md",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### HTTP Transport
+
+Foreground:
+
+```bash
+session-md mcp --http              # default port 8282
+session-md mcp --http --port 9000  # custom port
+```
+
+Daemon (background):
+
+```bash
+session-md mcp --http --daemon
+session-md mcp stop
+```
+
+Daemon logs: `~/.cache/session-md/mcp.log`
+
+Health check: `GET http://localhost:8282/health`
+
+### MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `search_sessions` | Full-text search across all indexed sessions |
+| `list_sessions` | List sessions, optionally filtered by source |
+| `get_session` | Retrieve full Markdown content of a session by ID |
+| `import_sessions` | Re-scan all configured sources and update the index |
+
 ## Requirements
 
 - [Bun](https://bun.sh) >= 1.0
