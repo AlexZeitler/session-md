@@ -28,7 +28,7 @@ Built with [Bun](https://bun.sh), [OpenTUI](https://github.com/anomalyco/opentui
 ### Global (recommended)
 
 ```bash
-bun install -g github:AlexZeitler/session-md
+bun install -g @alexzeitler/session-md
 session-md
 ```
 

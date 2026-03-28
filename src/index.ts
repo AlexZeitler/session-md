@@ -26,13 +26,13 @@ if (command === "update") {
   console.log("Checking for updates...");
 
   try {
-    const res = await fetch("https://api.github.com/repos/AlexZeitler/session-md/releases/latest");
+    const res = await fetch("https://registry.npmjs.org/@alexzeitler/session-md/latest");
     if (!res.ok) {
       console.error(`Failed to check for updates (HTTP ${res.status})`);
       process.exit(1);
     }
-    const release = await res.json() as { tag_name: string };
-    const latestVersion = release.tag_name.replace(/^v/, "");
+    const pkg = await res.json() as { version: string };
+    const latestVersion = pkg.version;
 
     if (latestVersion === oldVersion) {
       console.log(`✓ session-md v${oldVersion} is already up to date`);
@@ -43,7 +43,7 @@ if (command === "update") {
     console.log("Installing...");
 
     const proc = Bun.spawnSync({
-      cmd: ["bun", "install", "-g", "github:AlexZeitler/session-md#v" + latestVersion],
+      cmd: ["bun", "install", "-g", "@alexzeitler/session-md@" + latestVersion],
       stdout: "inherit",
       stderr: "inherit",
     });

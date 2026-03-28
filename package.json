@@ -1,7 +1,8 @@
 {
-  "name": "session-md",
+  "name": "@alexzeitler/session-md",
   "version": "0.5.0",
   "type": "module",
+  "files": ["src", "session-md"],
   "bin": {
     "session-md": "./session-md"
   },
